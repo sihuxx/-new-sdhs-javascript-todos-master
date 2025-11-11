@@ -29,7 +29,7 @@ const services = { // 함수 모음
   },
 };
 
-const setState = (newState) => { // newState(현 state를 변경시키는 매개변수)를 받는 상태변경 함수
+const setState = (newState) => { // newState(현 state를 변경시키는 매개변수)를 받는 상태변경 함수  
   state = { ...state, ...newState }; // state는 getStorage({ todos: [], inputValue: "" })이며, todos: []의 배열 안에 현재 상태 전체를 저장하고, inputValue: ""에 바뀔 상태를 저장한다.
   // 같은 키가 있으면 뒤에 오는 객체의 값이 우선시, 위 state는 {todos: [], inputValue: "", inputValue= ""} 형태이기 때문에 뒤에 오는 newState의 키가 덮어 써진다
   setStorage(state); // 로컬스토리지에 setState()를 통해 바뀐 상태를 저장한다

@@ -106,6 +106,8 @@ function checkTodo() {
 
 }
 
+every
+
 // 04 체크된 투두만 삭제
 clearCompleted.addEventListener('click', () => {
     const checks = $$('.toggle')

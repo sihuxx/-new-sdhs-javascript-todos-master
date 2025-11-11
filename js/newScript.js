@@ -2,14 +2,17 @@ const $ = (e) => document.querySelector(e)
 const $$ = (e) => document.querySelectorAll(e)
 
 const createElement = (element, attrs = {}) => Object.assign(document.createElement(element), attrs)
-const getStorage = (init = {}) => JSON.parse(localStorage.setItem("todos")) || init
-const setStorage = (state) => localStorage.setItem("todos". JSON.stringfy(state))
+const getStorage = (init = {}) => JSON.parse(localStorage.getItem("todos")) || init
+const setStorage = (state) => localStorage.setItem("todos", JSON.stringify(state))
 
-let state = getStorage({todos: [], inpuValue: ""})
+let state = getStorage({ todos: [], inputValue: "" })
 
-const todoList = $('.todo-list')
-const newTodoInput = $('.new-todo')
-                                                         
+const $todoList = $('.todo-list')
+const $todoInput = $('.new-todo')
+const $footer = $('.footer')
+const $allCheckLabel = $('.toggle-all-label')
+const $allCheckBtn = $('.toggle-all')
+
 const services = {
     createTodo(name) {
         const todo = {
@@ -25,8 +28,8 @@ const services = {
         setState({ todos })
     },
 
-    updateByTodo() {
-        const todos = state.todos.map((todo) => (todo.id === id ? {...todo, ...data} : todo))
+    checkByTodo(id, data) {
+        const todos = state.todos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo))
         setState({ todos })
     }
 }
@@ -34,4 +37,65 @@ const services = {
 const setState = (newState) => {
     state = { ...state, ...newState }
     setStorage(state)
+    render()
 }
+
+$todoInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && state.inputValue.trim()) {
+        const todo = services.createTodo(state.inputValue);
+        setState({ todos: [...state.todos, todo], inputValue: "" });
+    }
+});
+
+$todoInput.addEventListener('input', (e) => {
+    setState({ inputValue: e.target.value })
+})
+
+function render() {
+    $todoInput.value = state.inputValue;
+    $todoList.innerHTML = ``;
+    state.todos.forEach((todo) => {
+        const $todoItem = createElement("li", {
+            class: todo.completed ? "completed" : "",
+            id: todo.id,
+            innerHTML: `
+            <div class="view">
+            <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""}/>
+            <label>${todo.name}</label>
+            <button class="destroy"></button>
+            </div>
+            `,
+        });
+
+        const $checkbox = $todoItem.querySelector("input");
+        const $removeBtn = $todoItem.querySelector(".destroy");
+
+        $checkbox.addEventListener("change", () => {
+            services.checkByTodo(todo.id, { completed: $checkbox.checked });
+        });
+    
+        $removeBtn.addEventListener("click", () => {
+            services.removeByTodo(todo.id);
+        });
+
+        $todoList.appendChild($todoItem);
+    })
+
+    const isVisible = state.todos.length > 0
+
+    $footer.classList.toggle('hidden', !isVisible)
+    $allCheckLabel.classList.toggle('hidden', !isVisible)
+}
+
+function setAllCheckEvent() {
+    $allCheckBtn.addEventListener('change', () => {
+        const isAllChecked = state.todos.every(e => e.completed)
+
+        state.todos.forEach(e => e.completed = !isAllChecked)
+        setState({ todos: state.todos })
+    })
+}
+
+setAllCheckEvent()
+render()
+

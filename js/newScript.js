@@ -12,6 +12,8 @@ const $todoInput = $('.new-todo')
 const $footer = $('.footer')
 const $allCheckLabel = $('.toggle-all-label')
 const $allCheckBtn = $('.toggle-all')
+const $todoCount = $('.todo-count')
+const $clearCompleted = $('.clear-completed')
 
 const services = {
     createTodo(name) {
@@ -72,14 +74,24 @@ function render() {
 
         $checkbox.addEventListener("change", () => {
             services.checkByTodo(todo.id, { completed: $checkbox.checked });
-        });
-    
-        $removeBtn.addEventListener("click", () => {
-            services.removeByTodo(todo.id);
+            setCheck()
         });
 
+        $removeBtn.addEventListener("click", () => {
+            services.removeByTodo(todo.id);
+            setCheck()
+        });
+
+        setCheck()
+        
         $todoList.appendChild($todoItem);
     })
+
+    const notCheckTodos = state.todos.filter(e => !e.completed).length
+    const yesCheckTodos = state.todos.filter(e => e.completed).length
+    $todoCount.innerHTML = `<strong>${notCheckTodos}</strong> items left`
+
+    $clearCompleted.classList.toggle('hidden', yesCheckTodos === 0)
 
     const isVisible = state.todos.length > 0
 
@@ -87,14 +99,19 @@ function render() {
     $allCheckLabel.classList.toggle('hidden', !isVisible)
 }
 
+function setCheck() {
+    const isAllChecked = state.todos.every(e => e.completed);
+    $allCheckBtn.checked = isAllChecked;
+}
+
 function setAllCheckEvent() {
     $allCheckBtn.addEventListener('change', () => {
-        const isAllChecked = state.todos.every(e => e.completed)
-
-        state.todos.forEach(e => e.completed = !isAllChecked)
+        const allChecked = state.todos.every(e => e.completed);
+        state.todos.forEach(e => e.completed = !allChecked)
         setState({ todos: state.todos })
-    })
+    });
 }
+
 
 setAllCheckEvent()
 render()

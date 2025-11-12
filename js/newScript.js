@@ -36,14 +36,13 @@ const services = {
         const todos = state.todos.filter((e) => !e.completed)
         setState({ todos })
     },
-    setCheck(element) {
-        const isAllChecked = state.todos.every(e => e.completed);
-        element.checked = isAllChecked;
-    },
     setAllCheckEvent() {
         const allChecked = state.todos.every(e => e.completed);
         state.todos.forEach(e => e.completed = !allChecked)
         setState({ todos: state.todos })
+    },
+    get setCheck() {
+        return state.todos.every(e => e.completed);
     },
     get notCheckTodo() {
         return state.todos.filter(e => !e.completed).length
@@ -105,24 +104,22 @@ function render() {
             services.removeByTodo(todo.id);
         });
 
-        $clearCompleted.addEventListener('click', () => {
-            services.completedCheck()
-        })
-    
         $todoList.appendChild($todoItem);
     })
-    
+
     $footer.classList.toggle('hidden', !services.isVisible)
     $allCheckLabel.classList.toggle('hidden', !services.isVisible)
 
     $todoCount.innerHTML = `<strong>${services.notCheckTodo}</strong> items left`
     $clearCompleted.classList.toggle('hidden', services.yesCheckTodo === 0)
-
-    services.setCheck($allCheckBtn)
-    services.sideBarVisible()
+    
+    $allCheckBtn.checked = services.setCheck;
 }
 
+$clearCompleted.addEventListener('click', () => {
+    services.completedCheck()
+})
 render()
 
-// 모든 dom 요소 적용은 render에서 
+// 모든 dom 요소 적용은 render에서
 // getter 방식 함수는 () X

@@ -24,44 +24,36 @@ const services = {
         }
         return todo
     },
-
     removeByTodo(id) {
         const todos = state.todos.filter((todo) => todo.id !== id)
         setState({ todos })
     },
-
     checkByTodo(id, data) {
         const todos = state.todos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo))
         setState({ todos })
-    },
-
-    notCheckTodo() {
-        return state.todos.filter(e => !e.completed).length
-    },
-    yesCheckTodo() {
-        return state.todos.filter(e => e.completed).length
     },
     completedCheck() {
         const todos = state.todos.filter((e) => !e.completed)
         setState({ todos })
     },
-    setCheck() {
+    setCheck(element) {
         const isAllChecked = state.todos.every(e => e.completed);
-        $allCheckBtn.checked = isAllChecked;
+        element.checked = isAllChecked;
     },
     setAllCheckEvent() {
-        $allCheckBtn.addEventListener('change', () => {
-            const allChecked = state.todos.every(e => e.completed);
-            state.todos.forEach(e => e.completed = !allChecked)
-            setState({ todos: state.todos })
-        });
+        const allChecked = state.todos.every(e => e.completed);
+        state.todos.forEach(e => e.completed = !allChecked)
+        setState({ todos: state.todos })
     },
-    sideBarVisible() {
-        const isVisible = state.todos.length > 0
-
-        $footer.classList.toggle('hidden', !isVisible)
-        $allCheckLabel.classList.toggle('hidden', !isVisible)
-    }
+    get notCheckTodo() {
+        return state.todos.filter(e => !e.completed).length
+    },
+    get yesCheckTodo() {
+        return state.todos.filter(e => e.completed).length
+    },
+    get isVisible() {
+        return state.todos.length > 0
+    },
 }
 
 const setState = (newState) => {
@@ -80,6 +72,11 @@ $todoInput.addEventListener("keydown", function (e) {
 $todoInput.addEventListener('input', (e) => {
     setState({ inputValue: e.target.value })
 })
+
+$allCheckBtn.addEventListener('change', () => {
+    services.setAllCheckEvent()
+});
+
 
 function render() {
     $todoInput.value = state.inputValue;
@@ -111,17 +108,21 @@ function render() {
         $clearCompleted.addEventListener('click', () => {
             services.completedCheck()
         })
-
+    
         $todoList.appendChild($todoItem);
     })
     
-    $todoCount.innerHTML = `<strong>${services.notCheckTodo()}</strong> items left`
-    $clearCompleted.classList.toggle('hidden', services.yesCheckTodo() === 0)
-    
-    services.setCheck()
+    $footer.classList.toggle('hidden', !services.isVisible)
+    $allCheckLabel.classList.toggle('hidden', !services.isVisible)
+
+    $todoCount.innerHTML = `<strong>${services.notCheckTodo}</strong> items left`
+    $clearCompleted.classList.toggle('hidden', services.yesCheckTodo === 0)
+
+    services.setCheck($allCheckBtn)
     services.sideBarVisible()
 }
 
-services.setAllCheckEvent()
 render()
 
+// 모든 dom 요소 적용은 render에서 
+// getter 방식 함수는 () X

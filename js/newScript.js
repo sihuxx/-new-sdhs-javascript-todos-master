@@ -83,7 +83,7 @@ function render() {
         });
 
         setCheck()
-        
+
         $todoList.appendChild($todoItem);
     })
 
@@ -92,6 +92,10 @@ function render() {
     $todoCount.innerHTML = `<strong>${notCheckTodos}</strong> items left`
 
     $clearCompleted.classList.toggle('hidden', yesCheckTodos === 0)
+    $clearCompleted.addEventListener('click', () => {
+        const todos = state.todos.filter((e) => !e.completed)
+        setState({ todos })
+    })
 
     const isVisible = state.todos.length > 0
 
@@ -111,7 +115,6 @@ function setAllCheckEvent() {
         setState({ todos: state.todos })
     });
 }
-
 
 setAllCheckEvent()
 render()

@@ -33,6 +33,34 @@ const services = {
     checkByTodo(id, data) {
         const todos = state.todos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo))
         setState({ todos })
+    },
+
+    notCheckTodo() {
+        return state.todos.filter(e => !e.completed).length
+    },
+    yesCheckTodo() {
+        return state.todos.filter(e => e.completed).length
+    },
+    completedCheck() {
+        const todos = state.todos.filter((e) => !e.completed)
+        setState({ todos })
+    },
+    setCheck() {
+        const isAllChecked = state.todos.every(e => e.completed);
+        $allCheckBtn.checked = isAllChecked;
+    },
+    setAllCheckEvent() {
+        $allCheckBtn.addEventListener('change', () => {
+            const allChecked = state.todos.every(e => e.completed);
+            state.todos.forEach(e => e.completed = !allChecked)
+            setState({ todos: state.todos })
+        });
+    },
+    sideBarVisible() {
+        const isVisible = state.todos.length > 0
+
+        $footer.classList.toggle('hidden', !isVisible)
+        $allCheckLabel.classList.toggle('hidden', !isVisible)
     }
 }
 
@@ -74,48 +102,26 @@ function render() {
 
         $checkbox.addEventListener("change", () => {
             services.checkByTodo(todo.id, { completed: $checkbox.checked });
-            setCheck()
         });
 
         $removeBtn.addEventListener("click", () => {
             services.removeByTodo(todo.id);
-            setCheck()
         });
 
-        setCheck()
+        $clearCompleted.addEventListener('click', () => {
+            services.completedCheck()
+        })
 
         $todoList.appendChild($todoItem);
     })
-
-    const notCheckTodos = state.todos.filter(e => !e.completed).length
-    const yesCheckTodos = state.todos.filter(e => e.completed).length
-    $todoCount.innerHTML = `<strong>${notCheckTodos}</strong> items left`
-
-    $clearCompleted.classList.toggle('hidden', yesCheckTodos === 0)
-    $clearCompleted.addEventListener('click', () => {
-        const todos = state.todos.filter((e) => !e.completed)
-        setState({ todos })
-    })
-
-    const isVisible = state.todos.length > 0
-
-    $footer.classList.toggle('hidden', !isVisible)
-    $allCheckLabel.classList.toggle('hidden', !isVisible)
+    
+    $todoCount.innerHTML = `<strong>${services.notCheckTodo()}</strong> items left`
+    $clearCompleted.classList.toggle('hidden', services.yesCheckTodo() === 0)
+    
+    services.setCheck()
+    services.sideBarVisible()
 }
 
-function setCheck() {
-    const isAllChecked = state.todos.every(e => e.completed);
-    $allCheckBtn.checked = isAllChecked;
-}
-
-function setAllCheckEvent() {
-    $allCheckBtn.addEventListener('change', () => {
-        const allChecked = state.todos.every(e => e.completed);
-        state.todos.forEach(e => e.completed = !allChecked)
-        setState({ todos: state.todos })
-    });
-}
-
-setAllCheckEvent()
+services.setAllCheckEvent()
 render()
 

@@ -103,7 +103,6 @@ function checkTodo() {
             clearTextVisible()
         })
     })
-
 }
 
 // 04 체크된 투두만 삭제

@@ -41,19 +41,6 @@ const services = {
         state.todos.forEach(e => e.completed = !allChecked)
         setState({ todos: state.todos })
     },
-    hashChange() {
-        const hash = location.hash
-        const backTodo = [...state.todos]
-        setState({ backTodo })
-        
-        if (hash === '#/active' && services.getHash) {
-            const todos = state.todos.filter((e) => !e.completed)
-            setState({ todos })
-        } else if (hash === '#/completed' && services.getHash) {
-            const todos = state.todos.filter((e) => e.completed)
-            setState({ todos })
-        }
-    },
     get setCheck() {
         return state.todos.every(e => e.completed);
     },
@@ -66,18 +53,6 @@ const services = {
     get isVisible() {
         return state.todos.length > 0
     },
-    get getHash() {
-        const allCompleted = state.todos.every((e) => e.completed)
-        const allActive = state.todos.every((e) => !e.completed)
-
-        if (allActive) {
-            return 'active'
-        } else if (allCompleted) {
-            return 'completed'
-        } else {
-            return 'all'
-        }
-    }
 }
 
 const setState = (newState) => {
@@ -100,6 +75,7 @@ $todoInput.addEventListener('input', (e) => {
 $allCheckBtn.addEventListener('change', () => {
     services.setAllCheckEvent()
 });
+
 
 function render() {
     $todoInput.value = state.inputValue;
@@ -136,12 +112,8 @@ function render() {
 
     $todoCount.innerHTML = `<strong>${services.notCheckTodo}</strong> items left`
     $clearCompleted.classList.toggle('hidden', services.yesCheckTodo === 0)
-
+    
     $allCheckBtn.checked = services.setCheck;
-
-    window.addEventListener('hashchange', () => {
-        services.hashChange()
-    })
 }
 
 $clearCompleted.addEventListener('click', () => {

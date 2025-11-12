@@ -58,7 +58,7 @@ function render() {
     $todoList.innerHTML = ``;
     state.todos.forEach((todo) => {
         const $todoItem = createElement("li", {
-            class: todo.completed ? "completed" : "",
+            className: todo.completed ? "completed" : "",
             id: todo.id,
             innerHTML: `
             <div class="view">

@@ -164,20 +164,40 @@ window.addEventListener("hashchange", () => {
     .join("");
 });
 
-/*
- $todoList.addEventListener("click", (e) => {
-  e.target.closest("li").classList.add("editing");
-  const todoText = e.target('li').querySelector('label').textContent
+let editingTodo = null; 
+
+$todoList.addEventListener("click", (e) => {
+  const li = e.target.closest("li");
+  if (!li) return;
+
+  if (editingTodo && editingTodo !== li) {
+    
+  }
+
+  if (li.querySelector("input.edit")) return;
+
+  li.classList.add("editing");
+
+  const label = li.querySelector("label");
+  const todoText = label.textContent;
+
   const input = document.createElement("input");
   input.className = "edit";
   input.type = "text";
-  input.value = todoText
-  if (e.target.closest('li').querySelector('input.edit')) {
-    return
-  }
-  e.target.closest("li").appendChild(input);
-}); 
-*/
+  input.value = todoText;
+
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') {
+        label.textContent = input.value 
+        input.remove()
+        li.classList.remove('editing')
+    }
+  })
+
+  li.appendChild(input);
+  input.focus();
+});
+
 
 $clearCompleted.addEventListener("click", () => {
   services.completedCheck();

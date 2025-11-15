@@ -135,37 +135,52 @@ function render() {
   $footer.classList.toggle("hidden", !services.isVisible);
   $allCheckLabel.classList.toggle("hidden", !services.isVisible);
 
+  $filters.addEventListener("click", (e) => {
+    if (e.target.tagName !== "A") return;
+
+    $filters.querySelectorAll("a").forEach((e) => e.classList.remove("selected"));
+    e.target.classList.add("selected");
+  });
+
   $todoCount.innerHTML = `<strong>${services.notCheckTodo}</strong> items left`;
   $clearCompleted.classList.toggle("hidden", services.yesCheckTodo === 0);
 
   $allCheckBtn.checked = services.setCheck;
-
-  window.addEventListener("hashchange", () => {
-    $todoList.innerHTML = services.filteredTodos
-      .map(
-        (todo) => `
-            <li>
-                <div class="view">
-                    <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
-                    <label>${todo.name}</label>
-                    <button class="destroy"></button>
-                </div>
-            </li>
-        `
-      )
-      .join("");
-  });
 }
+
+window.addEventListener("hashchange", () => {
+  $todoList.innerHTML = services.filteredTodos
+    .map(
+      (todo) => `
+          <li>
+              <div class="view">
+                  <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
+                  <label>${todo.name}</label>
+                  <button class="destroy"></button>
+              </div>
+          </li>
+      `
+    )
+    .join("");
+});
+
+/*
+ $todoList.addEventListener("click", (e) => {
+  e.target.closest("li").classList.add("editing");
+  const todoText = e.target('li').querySelector('label').textContent
+  const input = document.createElement("input");
+  input.className = "edit";
+  input.type = "text";
+  input.value = todoText
+  if (e.target.closest('li').querySelector('input.edit')) {
+    return
+  }
+  e.target.closest("li").appendChild(input);
+}); 
+*/
 
 $clearCompleted.addEventListener("click", () => {
   services.completedCheck();
-});
-
-$filters.addEventListener("click", (e) => {
-  if (e.target.tagName !== "A") return;
-
-  $filters.querySelectorAll("a").forEach((e) => e.classList.remove("selected"));
-  e.target.classList.add("selected");
 });
 
 render();

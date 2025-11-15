@@ -5,7 +5,7 @@ const createElement = (element, attrs = {}) => Object.assign(document.createElem
 const getStorage = (init = {}) => JSON.parse(localStorage.getItem("todos")) || init
 const setStorage = (state) => localStorage.setItem("todos", JSON.stringify(state))
 
-let state = getStorage({ todos: [], inputValue: "" })
+let state = getStorage({ todos: [], originalTodos: [], inputValue: "" })
 
 const $todoList = $('.todo-list')
 const $todoInput = $('.new-todo')
@@ -25,33 +25,37 @@ const services = {
         return todo
     },
     removeByTodo(id) {
-        const todos = state.todos.filter((todo) => todo.id !== id)
-        setState({ todos })
+        const todos = state.originalTodos.filter((todo) => todo.id !== id)
+        setState({ originalTodos: todos })
+        services.hashChange()
     },
     checkByTodo(id, data) {
-        const todos = state.todos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo))
-        setState({ todos })
+        const todos = state.originalTodos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo))
+        setState({ originalTodos: todos })
+        services.hashChange()
     },
     completedCheck() {
-        const todos = state.todos.filter((e) => !e.completed)
-        setState({ todos })
+        const todos = state.originalTodos.filter((e) => !e.completed)
+        setState({ originalTodos: todos })
+        services.hashChange()
     },
     setAllCheckEvent() {
-        const allChecked = state.todos.every(e => e.completed);
-        state.todos.forEach(e => e.completed = !allChecked)
-        setState({ todos: state.todos })
+        const allChecked = state.originalTodos.every(e => e.completed);
+        const todos = state.originalTodos.map(e => ({...e, completed: !allChecked}))
+        setState({ originalTodos: todos })
+        services.hashChange()
     },
     hashChange() {
         const hash = location.hash
-        const backTodo = [...state.todos]
-        setState({ backTodo })
         
-        if (hash === '#/active' && services.getHash) {
-            const todos = state.todos.filter((e) => !e.completed)
+        if (hash === '#/active') {
+            const todos = state.originalTodos.filter((e) => !e.completed)
             setState({ todos })
-        } else if (hash === '#/completed' && services.getHash) {
-            const todos = state.todos.filter((e) => e.completed)
+        } else if (hash === '#/completed') {
+            const todos = state.originalTodos.filter((e) => e.completed)
             setState({ todos })
+        } else {
+            setState({ todos: [...state.originalTodos] })
         }
     },
     get setCheck() {
@@ -67,8 +71,8 @@ const services = {
         return state.todos.length > 0
     },
     get getHash() {
-        const allCompleted = state.todos.every((e) => e.completed)
-        const allActive = state.todos.every((e) => !e.completed)
+        const allCompleted = state.originalTodos.every((e) => e.completed)
+        const allActive = state.originalTodos.every((e) => !e.completed)
 
         if (allActive) {
             return 'active'
@@ -89,7 +93,11 @@ const setState = (newState) => {
 $todoInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && state.inputValue.trim()) {
         const todo = services.createTodo(state.inputValue);
-        setState({ todos: [...state.todos, todo], inputValue: "" });
+        setState({
+            todos: [...state.todos, todo],
+            originalTodos: [...state.originalTodos, todo],
+            inputValue: ""
+        })
     }
 });
 
@@ -139,10 +147,10 @@ function render() {
 
     $allCheckBtn.checked = services.setCheck;
 
-    window.addEventListener('hashchange', () => {
-        services.hashChange()
-    })
 }
+window.addEventListener('hashchange', () => {
+    services.hashChange()
+})
 
 $clearCompleted.addEventListener('click', () => {
     services.completedCheck()

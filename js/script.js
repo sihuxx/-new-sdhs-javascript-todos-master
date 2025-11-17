@@ -194,12 +194,10 @@ function editTodo() {
             const todoLabel = t.querySelector('label')
             const todoText = todoLabel.textContent
 
- /*            const editInput = document.createElement('input')
+            const editInput = document.createElement('input')
             editInput.className = 'edit'
             editInput.type = 'text'
-            editInput.value = todoText */
-
-                               
+            editInput.value = todoText             
 
             t.appendChild(editInput)
             editInput.focus()

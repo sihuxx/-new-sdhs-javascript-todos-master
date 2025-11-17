@@ -22,6 +22,7 @@ const services = {
       id: crypto.randomUUID(),
       name,
       completed: false,
+      editing: false
     };
     return todo;
   },
@@ -33,7 +34,7 @@ const services = {
     const todos = state.todos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo));
     setState({ todos });
   },
-  updateByTodo(id, data) {
+  editByTodo(id, data) {
     const todos = state.todos.map((todo) => (todo.id === id ? { ...todo, ...data } : todo));
     setState({ todos });
   },
@@ -115,7 +116,7 @@ function render() {
 
   todosRender.forEach((todo) => {
     const $todoItem = createElement("li", {
-      className: todo.completed ? "completed" : "",
+      className: `${todo.completed ? "completed" : ""} ${todo.editing ? "editing" : ""}`,
       id: todo.id,
       innerHTML: `
         <div class="view">
@@ -125,27 +126,54 @@ function render() {
         </div>
       `,
     });
-
+    
+    if (todo.editing) {
+      const input = createElement("input", {
+        className: 'edit',
+        type: 'text',
+        value: todo.name,
+      });
+      
+      input.addEventListener('blur', () => {
+        services.editByTodo(todo.id, { name: input.value, editing: false })
+      })
+      input.addEventListener('keydown', (e) => {
+        if (e.key === "Enter") {
+          services.editByTodo(todo.id, { name: input.value, editing: false })
+        }
+      })
+      $todoItem.appendChild(input)
+    } else {
+      $todoItem.innerHTML = `
+      <div class="view">
+      <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""}/>
+      <label>${todo.name}</label>
+      <button class="destroy"></button>
+      </div>`
+    }
+    
+    
     const $checkbox = $todoItem.querySelector("input.toggle");
     const $removeBtn = $todoItem.querySelector(".destroy");
-
+    
     $checkbox.addEventListener("change", () => {
       services.checkByTodo(todo.id, { completed: $checkbox.checked });
     });
-
+    
     $removeBtn.addEventListener("click", () => {
       services.removeByTodo(todo.id);
     });
-
+    
     $todoList.appendChild($todoItem);
+    
   });
-
+  
   $footer.classList.toggle("hidden", !services.isVisible);
   $allCheckLabel.classList.toggle("hidden", !services.isVisible);
-
+  
   $todoCount.innerHTML = `<strong>${services.notCheckTodo}</strong> items left`;
   $clearCompleted.classList.toggle("hidden", services.yesCheckTodo === 0);
-
+  
   $allCheckBtn.checked = services.setCheck;
 }
 
@@ -153,55 +181,12 @@ window.addEventListener("hashchange", () => {
   render()
 });
 
-let editingTodo = null;
-
 $todoList.addEventListener("dblclick", (e) => {
   const li = e.target.closest("li");
+  if (!li) return
 
-  if (!li || editingTodo === li) return;
-  if (li.querySelector("input.edit")) return;
-
-  editingTodo = li;
-  li.classList.add("editing");
-
-  const label = li.querySelector("label");
-  const id = li.id;
-
-  const input = createElement("input", {
-    className: 'edit',
-    type: 'text',
-    value: label.textContent
-  });
-
-  function saveTodo() {
-    const value = input.value.trim();
-
-    if (value === "") {
-      services.deleteTodo(id);
-      li.remove();
-    } else {
-      services.updateByTodo(id, { name: value });
-      label.textContent = value;
-    }
-
-    input.remove();
-    li.classList.remove("editing");
-    document.removeEventListener("click", clickOutside);
-    editingTodo = null;
-  }
-
-  function clickOutside(event) {
-    if (!li.contains(event.target)) saveTodo();
-  }
-
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") saveTodo();
-  });
-
-  document.addEventListener("click", clickOutside);
-
-  li.appendChild(input);
-  input.focus();
+  const id = li.id 
+  services.editByTodo(id, { editing: true })
 });
 
 $clearCompleted.addEventListener("click", () => {

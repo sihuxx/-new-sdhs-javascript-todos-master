@@ -143,14 +143,7 @@ function render() {
         }
       })
       $todoItem.appendChild(input)
-    } else {
-      $todoItem.innerHTML = `
-      <div class="view">
-      <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""}/>
-      <label>${todo.name}</label>
-      <button class="destroy"></button>
-      </div>`
-    }
+    } 
     
     
     const $checkbox = $todoItem.querySelector("input.toggle");
